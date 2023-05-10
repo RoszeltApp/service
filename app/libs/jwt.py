@@ -58,7 +58,6 @@ def _encode(payload: dict) -> str:
 
 
 def create_access_token(user_data: dict) -> str:
-    """Создание токена доступа"""
 
     payload = {
         **user_data,
