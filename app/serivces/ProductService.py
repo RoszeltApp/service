@@ -37,7 +37,7 @@ class ProductService:
                 mapping_product = self.productRepository.get_product_by_article(product.article)
 
                 if mapping_product is None:
-                    prod.class_id = self.classificator.classify()
+                    # prod.class_id = self.classificator.classify()
                     stock = CommercialCharacteristics(**fields_stock)
                     id_mapping = self.productRepository.add_product(prod, stock, supplier_id)
                     self.productRepository.add_props(id_mapping, product.props)
