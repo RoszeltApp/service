@@ -143,7 +143,8 @@ class ProductRepository(BaseRepository):
                      .options(joinedload(UserProductMapping.stock),
                               joinedload(UserProductMapping.props).options(load_only(TechnicalCharacteristics.name,
                                                                                      TechnicalCharacteristics.value)),
-                              load_only(UserProductMapping.id),
+                              joinedload(UserProductMapping.media),
+                              load_only(UserProductMapping.id, UserProductMapping.image),
 
                               joinedload(UserProductMapping.user).options(load_only(User.name))
                               )).first()
