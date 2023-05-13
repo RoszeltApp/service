@@ -69,8 +69,9 @@ class ProductService:
         else:
             raise ValidationError(status_code=403, msg=f"У пользователя не существует товара с id={product_id}")
 
-    def my_products(self, supplier_id: int, limit: int, offset: int):
-        return self.productRepository.get_products_for_supplier(supplier_id=supplier_id, limit=limit, offset=offset)
+    def my_products(self, supplier_id: int, limit: int, offset: int, query_string: str):
+        return self.productRepository.get_products_for_supplier(supplier_id=supplier_id, limit=limit, offset=offset,
+                                                                query_string=query_string)
 
     def catalog(self, _filter: ProductFilter):
         return self.productRepository.get_catalog(_filter)

@@ -115,13 +115,25 @@ class ProductRepository(BaseRepository):
         self.db.delete(mapping)
         self.db.commit()
 
-    def get_products_for_supplier(self, supplier_id: int, limit: int, offset: int):
-        mappings = self.db.query(UserProductMapping) \
-            .where(UserProductMapping.user_id == supplier_id) \
-            .options(joinedload(UserProductMapping.stock), joinedload(UserProductMapping.product)) \
-            .limit(limit).offset(offset).all()
+    def get_products_for_supplier(self, supplier_id: int, limit: int, offset: int, query_string: str):
+        # mappings = self.db.query(UserProductMapping) \
+        #     .where(UserProductMapping.user_id == supplier_id) \
+        #     .options(joinedload(UserProductMapping.stock), joinedload(UserProductMapping.product))\
+        #     .limit(limit).offset(offset).all()
 
-        count = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id).count()
+        mappings = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id).\
+            join(UserProductMapping.stock).join(UserProductMapping.product).\
+            options(contains_eager(UserProductMapping.stock)).options(contains_eager(UserProductMapping.product))
+
+        if query_string is not None:
+            query_string = f"%{query_string}%"
+            mappings = mappings.where(Product.name.like(query_string))
+
+        count = mappings.count()
+        mappings = mappings.limit(limit).offset(offset).all()
+
+
+        # count = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id).count()
         return {'total_count': count, 'data': mappings}
 
     def get_product_card(self, product_id: int):

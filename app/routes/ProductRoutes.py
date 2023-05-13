@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 
 from app.libs.jwt import JWTBearer, get_payload
-from app.schemas.Product import ProductFilter, ProductBase, ProductTest, Stock
+from app.schemas.Product import ProductFilter, ProductBase, ProductTest, Stock, MyProductsFilter
 from app.serivces.ProductService import ProductService
 
 product_router = APIRouter(prefix='/api/product', tags=['Товары'])
@@ -15,10 +15,13 @@ def catalog(_filter: ProductFilter = Depends(), product_service: ProductService 
 
 
 @product_router.get('/my_list', summary='Мои товары')
-def my_products(limit: int, offset: int, auth=Depends(JWTBearer()), product_service: ProductService = Depends()):
+def my_products(_filter: MyProductsFilter = Depends(),
+                auth=Depends(JWTBearer()), product_service: ProductService = Depends()):
+
     token = auth.credentials
     payload = get_payload(token)
-    return product_service.my_products(supplier_id=payload['id'], limit=limit, offset=offset)
+    return product_service.my_products(supplier_id=payload['id'], limit=_filter.limit, offset=_filter.offset,
+                                       query_string=_filter.query_string)
 
 
 @product_router.post('/upload_products', summary='Загрузка товаров')

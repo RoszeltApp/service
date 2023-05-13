@@ -49,10 +49,10 @@ class Class(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False, unique=True)
     class_params = Column(JSON, nullable=True, unique=False)
-    is_leaf = Column(Boolean, nullable=False, default=False)
-
-    parent_id = Column(Integer, ForeignKey('Class.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
-    children = relationship('Class', backref=backref('parent', remote_side=[id]))
+    # is_leaf = Column(Boolean, nullable=False, default=False)
+    class_icon = Column(String(256), nullable=True, unique=False)
+    # parent_id = Column(Integer, ForeignKey('Class.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
+    # children = relationship('Class', backref=backref('parent', remote_side=[id]))
     product = relationship('Product', back_populates='class_product')
 
 
@@ -61,6 +61,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(256), nullable=False, unique=True)
     article = Column(String(256), nullable=False, unique=True)
+    brand = Column(String(256), nullable=True, unique=False)
 
     class_id = Column(Integer, ForeignKey('Class.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
     users = relationship('User', secondary='UserProductMapping', back_populates='products')
@@ -75,10 +76,13 @@ class UserProductMapping(Base):
     user_id = Column(Integer, ForeignKey('User.id', onupdate='CASCADE', ondelete='CASCADE'))
     product_id = Column(Integer, ForeignKey('Product.id', onupdate='CASCADE', ondelete='CASCADE'))
 
+    image = Column(String, nullable=True, unique=False)
+
     props = relationship('TechnicalCharacteristics', back_populates='product')
     stock = relationship('CommercialCharacteristics', back_populates="mapping", uselist=False)
     product = relationship('Product', back_populates='mapping')
     user = relationship('User', back_populates='mapping')
+    media = relationship('MediaFiles', back_populates='mapping')
 
 
 class TechnicalCharacteristics(Base):
@@ -98,3 +102,12 @@ class CommercialCharacteristics(Base):
     price = Column(Integer, nullable=True)
 
     mapping = relationship('UserProductMapping', back_populates='stock')
+
+
+class MediaFiles(Base):
+    __tablename__ = 'MediaFiles'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    path = Column(String(300), nullable=False, unique=False)
+
+    user_product_id = Column(Integer, ForeignKey('UserProductMapping.id', onupdate='CASCADE', ondelete='CASCADE'))
+    mapping = relationship('UserProductMapping', back_populates='media')

@@ -53,3 +53,9 @@ class ProductTest(BaseModel):
 class Stock(BaseModel):
     price: Optional[float]
     quantity: Optional[int]
+
+
+class MyProductsFilter(BaseModel):
+    limit: int
+    offset: int
+    query_string: Optional[str]
