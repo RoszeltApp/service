@@ -24,7 +24,7 @@ class ProductBase(BaseModel):
     article: str
     price: float
     quantity: int
-
+    brand: str
     props: List[Props]
 
 

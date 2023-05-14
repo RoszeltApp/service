@@ -4,7 +4,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session, lazyload, joinedload, load_only, contains_eager
 
 from app.Models.models import User, Role, Product, TechnicalCharacteristics, UserProductMapping, \
-    CommercialCharacteristics
+    CommercialCharacteristics, MediaFiles
 from app.repositories.BaseRepository import BaseRepository
 from app.schemas.Product import ProductFilter, Props
 
@@ -163,3 +163,18 @@ class ProductRepository(BaseRepository):
 
     def get_product_by_article(self, article: str):
         return self.db.query(Product).where(Product.article == article).first()
+
+    def add_image_for_offer(self, mapping_id: int, image: str):
+        query = self.db.query(UserProductMapping).where(UserProductMapping.id == mapping_id).first()
+        query.image = image
+        self.db.merge(query)
+        self.db.commit()
+
+    def add_media(self, mapping_id: int, image: str):
+        media = MediaFiles()
+        media.path = image
+        media.user_product_id = mapping_id
+
+        self.db.add(media)
+        self.db.commit()
+

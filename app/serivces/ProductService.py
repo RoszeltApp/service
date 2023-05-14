@@ -1,6 +1,8 @@
+import datetime
 from typing import List
 
-from fastapi import Depends
+from fastapi import Depends, UploadFile
+from minio import Minio
 
 from app.Models.models import Product, CommercialCharacteristics
 from app.libs.jwt import ValidationError
@@ -20,11 +22,13 @@ class ProductService:
 
     def add_products(self, products: List[ProductBase], supplier_id):
         ids = []
+        success_products = []
         success = 0
         for product in products:
             fields_prod = {
                 'name': product.name,
                 'article': product.article,
+                'brand': product.brand,
                 'class_id': None
             }
             fields_stock = {
@@ -41,7 +45,10 @@ class ProductService:
                     stock = CommercialCharacteristics(**fields_stock)
                     id_mapping = self.productRepository.add_product(prod, stock, supplier_id)
                     self.productRepository.add_props(id_mapping, product.props)
+
                     success += 1
+                    print(prod.id)
+                    success_products.append({'article': prod.article, 'id': prod.id})
                 else:
                     pass
 
@@ -50,7 +57,8 @@ class ProductService:
 
         return {
             'download_products': success,
-            'products_failed': ids
+            'products_failed': ids,
+            'success_products': success_products
         }
 
     def update_product(self, product: ProductTest, stock: Stock, supplier_id: int):
@@ -78,3 +86,27 @@ class ProductService:
 
     def get_card(self, product_id: int):
         return self.productRepository.get_product_card(product_id)
+
+    def add_gallery(self, product_id: int, supplier_id: int, files: List[UploadFile]):
+
+        client = Minio(
+            "172.20.0.2:9000",
+            access_key="minio",
+            secret_key="minio124",
+            secure=False
+        )
+        mapping = self.productRepository.get_mapping_table(product_id=product_id, supplier_id=supplier_id)
+
+        for file in files:
+            file_name = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f') + file.filename
+            file_name = file_name.replace(" ", "")
+
+            result = client.fput_object(
+                "testbucket", file_name,
+                file.file.fileno(),
+                content_type=file.content_type
+            )
+            self.productRepository.add_media(mapping.id, file_name)
+
+
+

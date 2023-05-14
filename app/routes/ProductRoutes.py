@@ -1,6 +1,10 @@
+import datetime
+import io
 from typing import List, Optional
+from fastapi import FastAPI, File, UploadFile
 
 from fastapi import APIRouter, Depends
+from minio import Minio
 
 from app.libs.jwt import JWTBearer, get_payload
 from app.schemas.Product import ProductFilter, ProductBase, ProductTest, Stock, MyProductsFilter
@@ -52,3 +56,14 @@ def delete_products(id: int, auth=Depends(JWTBearer()), product_service: Product
 @product_router.get('/card', summary='Карточка товара')
 def product_card(product_id: int, product_service: ProductService = Depends()):
     return product_service.get_card(product_id=product_id)
+
+
+@product_router.post('/upload_gallery', summary='Загрузка картинок')
+def upload_gallery(product_id: int, upload_file: List[UploadFile] = File(...), auth=Depends(JWTBearer()),
+                   product_service: ProductService = Depends()):
+    token = auth.credentials
+    payload = get_payload(token)
+
+    product_service.add_gallery(product_id=product_id, supplier_id=payload['id'], files=upload_file)
+
+    pass
