@@ -97,6 +97,9 @@ class ProductService:
         )
         mapping = self.productRepository.get_mapping_table(product_id=product_id, supplier_id=supplier_id)
 
+        if mapping is None:
+            raise ValidationError(status_code=403, msg=f"У пользователя не существует товара с id={product_id}")
+
         for file in files:
             file_name = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f') + file.filename
             file_name = file_name.replace(" ", "")
@@ -108,5 +111,24 @@ class ProductService:
             )
             self.productRepository.add_media(mapping.id, file_name)
 
+    def upload_main_image(self, product_id: int, supplier_id: int, file: UploadFile):
+        mapping = self.productRepository.get_mapping_table(product_id=product_id, supplier_id=supplier_id)
+        if mapping is None:
+            raise ValidationError(status_code=403, msg=f"У пользователя не существует товара с id={product_id}")
 
+        client = Minio(
+            "172.20.0.2:9000",
+            access_key="minio",
+            secret_key="minio124",
+            secure=False
+        )
+        file_name = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f') + file.filename
+        file_name = file_name.replace(" ", "")
 
+        mapping.image = file_name
+        result = client.fput_object(
+            "testbucket", file_name,
+            file.file.fileno(),
+            content_type=file.content_type
+        )
+        self.productRepository.update_mapping(mapping)

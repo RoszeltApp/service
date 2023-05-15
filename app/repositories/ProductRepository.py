@@ -178,3 +178,6 @@ class ProductRepository(BaseRepository):
         self.db.add(media)
         self.db.commit()
 
+    def update_mapping(self, mapping: UserProductMapping):
+        self.db.merge(mapping)
+        self.db.commit()

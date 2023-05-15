@@ -67,3 +67,12 @@ def upload_gallery(product_id: int, upload_file: List[UploadFile] = File(...), a
     product_service.add_gallery(product_id=product_id, supplier_id=payload['id'], files=upload_file)
 
     pass
+
+
+@product_router.post('/upload_main_image', summary='Загрузка превью')
+def upload_main_image(product_id: int, upload_file: UploadFile = File(...), auth=Depends(JWTBearer()),
+                      product_service: ProductService = Depends()):
+    token = auth.credentials
+    payload = get_payload(token)
+
+    product_service.upload_main_image(product_id=product_id, supplier_id=payload['id'], file=upload_file)
