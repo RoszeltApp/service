@@ -72,4 +72,9 @@ def delete_place_component(floor_id: int, product_id: int, auth=Depends(JWTBeare
     return gis_service.delete_component(floor_id=floor_id, product_id=product_id)
 
 
+@gis_router.get('/get_layer_components', summary='Слой с компонентами')
+def get_layer_components(floor_id: int, auth=Depends(JWTBearer()), gis_service: GISService = Depends()):
+    token = auth.credentials
+    payload = get_payload(token)
+    return gis_service.get_layer(floor_id)
 

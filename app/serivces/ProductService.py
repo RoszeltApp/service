@@ -132,3 +132,4 @@ class ProductService:
             content_type=file.content_type
         )
         self.productRepository.update_mapping(mapping)
+

@@ -15,9 +15,10 @@ class GISRepository(BaseRepository):
         return query.all()
 
     def get_layer_components(self, floor_id: int):
-        query = self.db.query(ComponentsLayer).join(ComponentsLayer.product).join(Product.class_product).\
-            options(contains_eager(ComponentsLayer.product).options(contains_eager(Product.class_product))).\
-            where(ComponentsLayer.floor_id == floor_id)
+        query = self.db.query(ComponentsLayer).\
+            join(ComponentsLayer.product).join(Product.class_product).\
+            options(contains_eager(ComponentsLayer.product).options(contains_eager(Product.class_product)))\
+            .where(ComponentsLayer.floor_id == floor_id)
 
         return query.all()
 
@@ -40,3 +41,5 @@ class GISRepository(BaseRepository):
     def upload_floor(self, floor: Floors):
         self.db.add(floor)
         self.db.commit()
+
+
