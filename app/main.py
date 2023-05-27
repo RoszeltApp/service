@@ -5,6 +5,7 @@ from starlette.responses import JSONResponse
 from app.libs.jwt import ValidationError
 from app.routes.ProductRoutes import product_router
 from app.routes.UserRoutes import user_router
+from app.routes.GisRoutes import gis_router
 from fastapi import Request
 
 app = FastAPI()
@@ -36,3 +37,4 @@ async def validation_error_handler(request: Request, exc: ValidationError):
 
 app.include_router(product_router)
 app.include_router(user_router)
+app.include_router(gis_router)
