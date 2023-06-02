@@ -97,7 +97,7 @@ class ProductService:
     def add_gallery(self, product_id: int, supplier_id: int, files: List[UploadFile]):
 
         client = Minio(
-            "172.20.0.2:9000",
+            "172.19.0.3:9000",
             access_key="minio",
             secret_key="minio124",
             secure=False
@@ -124,7 +124,7 @@ class ProductService:
             raise ValidationError(status_code=403, msg=f"У пользователя не существует товара с id={product_id}")
 
         client = Minio(
-            "172.20.0.2:9000",
+            "172.19.0.3:9000",
             access_key="minio",
             secret_key="minio124",
             secure=False
