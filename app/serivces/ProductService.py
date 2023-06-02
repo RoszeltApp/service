@@ -50,7 +50,14 @@ class ProductService:
                     print(prod.id)
                     success_products.append({'article': prod.article, 'id': prod.id})
                 else:
-                    pass
+                    print('test')
+                    created_mapping = self.productRepository.match(mapping_product.id, supplier_id)
+                    stock = CommercialCharacteristics(**fields_stock)
+                    self.productRepository.add_props(created_mapping.id, product.props)
+                    self.productRepository.add_stock(created_mapping.id, stock)
+                    print('stop test')
+                    success += 1
+                    success_products.append({'article': prod.article, 'id': mapping_product.id})
 
             except:
                 ids.append(product.article)

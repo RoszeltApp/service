@@ -181,3 +181,14 @@ class ProductRepository(BaseRepository):
     def update_mapping(self, mapping: UserProductMapping):
         self.db.merge(mapping)
         self.db.commit()
+
+    def match(self, prod_id: int, user_id: int):
+        mapping = UserProductMapping(product_id=prod_id, user_id=user_id)
+        self.db.add(mapping)
+        self.db.commit()
+        return mapping
+
+    def add_stock(self, mapping_id: int, stock: CommercialCharacteristics):
+        stock.id = mapping_id
+        self.db.add(stock)
+        self.db.commit()

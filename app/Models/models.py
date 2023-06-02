@@ -71,7 +71,6 @@ class Product(Base):
     class_product = relationship('Class', back_populates='product')
 
     mapping = relationship('UserProductMapping', back_populates='product')
-    layer = relationship('ComponentsLayer', back_populates='product')
 
 
 class UserProductMapping(Base):
@@ -87,6 +86,7 @@ class UserProductMapping(Base):
     product = relationship('Product', back_populates='mapping')
     user = relationship('User', back_populates='mapping')
     media = relationship('MediaFiles', back_populates='mapping')
+    layer = relationship('ComponentsLayer', back_populates='product_offer')
 
 
 class TechnicalCharacteristics(Base):
@@ -152,13 +152,13 @@ class ComponentsLayer(Base):
     __tablename__ = 'ComponentsLayer'
     id = Column(Integer, primary_key=True, autoincrement=True)
     floor_id = Column(Integer, ForeignKey('Floors.id', onupdate='CASCADE', ondelete='CASCADE'))
-    product_id = Column(Integer, ForeignKey('Product.id', onupdate='CASCADE', ondelete='CASCADE'))
+    product_offer_id = Column(Integer, ForeignKey('UserProductMapping.id', onupdate='CASCADE', ondelete='CASCADE'))
 
     lat = Column(Float, nullable=True)
     long = Column(Float, nullable=True)
 
     floor = relationship('Floors', back_populates='components_layers')
-    product = relationship('Product', back_populates='layer')
+    product_offer = relationship('UserProductMapping', back_populates='layer')
 
 
 

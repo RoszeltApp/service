@@ -69,11 +69,11 @@ class GISService:
 
         self.gis_repository.upload_floor(floor)
 
-    def add_component(self, floor_id: int, product_id: int, lat: float, long: float):
-        return self.gis_repository.add_component_in_layer(floor_id=floor_id, product_id=product_id, lat=lat, long=long)
+    def add_component(self, floor_id: int, product_offer_id: int, lat: float, long: float):
+        return self.gis_repository.add_component_in_layer(floor_id=floor_id, product_offer_id=product_offer_id, lat=lat, long=long)
 
-    def delete_component(self, floor_id: int, product_id: int):
+    def delete_component(self, id: int):
         try:
-            self.gis_repository.delete_component_in_layer(floor_id=floor_id, product_id=product_id)
+            self.gis_repository.delete_component_in_layer(id=id)
         except Exception:
             raise ValidationError(status_code=403, msg=f"Ошибка удаления")
