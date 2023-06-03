@@ -62,7 +62,7 @@ def create_access_token(user_data: dict) -> str:
     payload = {
         **user_data,
         'type': 'access',
-        'exp': (datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)).isoformat()
+        'exp': (datetime.utcnow() + timedelta(days=ACCESS_TOKEN_EXPIRE_MINUTES)).isoformat()
     }
 
     return _encode(payload)

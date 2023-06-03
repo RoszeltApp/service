@@ -1,10 +1,10 @@
 from typing import Optional, List
 
-from sqlalchemy import select, func
-from sqlalchemy.orm import Session, lazyload, joinedload, load_only, contains_eager
+from sqlalchemy import select, func, literal_column
+from sqlalchemy.orm import Session, lazyload, joinedload, load_only, contains_eager, aliased
 
 from app.Models.models import User, Role, Product, TechnicalCharacteristics, UserProductMapping, \
-    CommercialCharacteristics, MediaFiles
+    CommercialCharacteristics, MediaFiles, Class
 from app.repositories.BaseRepository import BaseRepository
 from app.schemas.Product import ProductFilter, Props
 
@@ -43,11 +43,12 @@ class ProductRepository(BaseRepository):
         pp = query.all()
         result = [i.id for i in pp]
 
-        q_offset = self.db.query(Product).where(Product.id.in_(result)).offset(_filter.offset).limit(_filter.limit).all()
+        q_offset = self.db.query(Product).where(Product.id.in_(result)).offset(_filter.offset).limit(
+            _filter.limit).all()
 
         result = [i.id for i in q_offset]
 
-        q3 = self.db.query(Product).where(Product.id.in_(result))\
+        q3 = self.db.query(Product).where(Product.id.in_(result)) \
             .join(Product.mapping).join(UserProductMapping.stock) \
             .options(contains_eager(Product.mapping).options(contains_eager(UserProductMapping.stock),
                                                              joinedload(UserProductMapping.user)
@@ -121,8 +122,8 @@ class ProductRepository(BaseRepository):
         #     .options(joinedload(UserProductMapping.stock), joinedload(UserProductMapping.product))\
         #     .limit(limit).offset(offset).all()
 
-        mappings = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id).\
-            join(UserProductMapping.stock).join(UserProductMapping.product).\
+        mappings = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id). \
+            join(UserProductMapping.stock).join(UserProductMapping.product). \
             options(contains_eager(UserProductMapping.stock)).options(contains_eager(UserProductMapping.product))
 
         if query_string is not None:
@@ -132,13 +133,12 @@ class ProductRepository(BaseRepository):
         count = mappings.count()
         mappings = mappings.limit(limit).offset(offset).all()
 
-
         # count = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id).count()
         return {'total_count': count, 'data': mappings}
 
     def get_product_card(self, product_id: int):
-        return self.db.query(Product)\
-            .where(Product.id == product_id)\
+        return self.db.query(Product) \
+            .where(Product.id == product_id) \
             .options(joinedload(Product.mapping)
                      .options(joinedload(UserProductMapping.stock),
                               joinedload(UserProductMapping.props).options(load_only(TechnicalCharacteristics.name,
@@ -192,3 +192,30 @@ class ProductRepository(BaseRepository):
         stock.id = mapping_id
         self.db.add(stock)
         self.db.commit()
+
+    def get_classificator_params(self):
+        cls = aliased(Class)
+        prod = aliased(Product)
+        upm = aliased(UserProductMapping)
+        teh = aliased(TechnicalCharacteristics)
+
+        result = self.db.query(
+            cls.id,
+            cls.name,
+            func.string_agg(teh.name, ',')
+        ). \
+            select_from(cls). \
+            outerjoin(prod, cls.id == prod.class_id). \
+            outerjoin(upm, upm.product_id == prod.id). \
+            outerjoin(teh, teh.user_product_id == upm.id). \
+            distinct().\
+            group_by(cls.id). \
+            all()
+
+        return {'res': [
+            {
+                'id': i[0],
+                'class_name': i[1],
+                'params': i[2][:5000]
+            }
+            for i in result]}

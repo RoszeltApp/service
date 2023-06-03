@@ -25,6 +25,7 @@ class ProductBase(BaseModel):
     price: float
     quantity: int
     brand: str
+    class_id: Optional[int]
     props: List[Props]
 
 

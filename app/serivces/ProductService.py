@@ -41,7 +41,15 @@ class ProductService:
                 mapping_product = self.productRepository.get_product_by_article(product.article)
 
                 if mapping_product is None:
-                    # prod.class_id = self.classificator.classify()
+                    class_params = self.productRepository.get_classificator_params()['res']
+                    prod_params = []
+                    for i in product.props:
+                        prod_params.append(i.name)
+                    prod.class_id = self.classificator.classify(prod_params, class_params)
+
+                    if product.class_id:
+                        prod.class_id = product.class_id
+
                     stock = CommercialCharacteristics(**fields_stock)
                     id_mapping = self.productRepository.add_product(prod, stock, supplier_id)
                     self.productRepository.add_props(id_mapping, product.props)
@@ -97,7 +105,7 @@ class ProductService:
     def add_gallery(self, product_id: int, supplier_id: int, files: List[UploadFile]):
 
         client = Minio(
-            "172.19.0.3:9000",
+            "minio:9000",
             access_key="minio",
             secret_key="minio124",
             secure=False
@@ -124,7 +132,7 @@ class ProductService:
             raise ValidationError(status_code=403, msg=f"У пользователя не существует товара с id={product_id}")
 
         client = Minio(
-            "172.19.0.3:9000",
+            "minio:9000",
             access_key="minio",
             secret_key="minio124",
             secure=False

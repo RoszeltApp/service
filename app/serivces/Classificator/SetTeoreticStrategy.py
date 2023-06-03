@@ -14,13 +14,15 @@ def list_to_str(str_list: List[str]):
 def algorithm_set_theoretic(product_params: List[str], classes: List[dict]) -> int:
     product_params.sort()
     product_params_str = list_to_str(product_params)
-
+    print('sas', product_params_str)
     min_distance = inf
     class_id = -1
 
     for _class in classes:
-        class_params = _class['params'].sort()
+        class_params = _class['params'].split(',')
+        class_params.sort()
         class_params_str = list_to_str(class_params)
+
         distance = calculate_distance(product_params_str, class_params_str)
         if distance < min_distance:
             min_distance = distance

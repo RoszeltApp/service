@@ -76,3 +76,8 @@ def upload_main_image(product_id: int, upload_file: UploadFile = File(...), auth
     payload = get_payload(token)
 
     product_service.upload_main_image(product_id=product_id, supplier_id=payload['id'], file=upload_file)
+
+
+@product_router.get('/test', summary='test')
+def test(product_service: ProductService = Depends()):
+    return product_service.productRepository.get_classificator_params()
