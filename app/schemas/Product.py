@@ -10,7 +10,7 @@ class ProductFilter(BaseModel):
     suppliers: Optional[str]
     price_min: Optional[int]
     price_max: Optional[int]
-    category: Optional[int]
+    category: Optional[str]
     order_by_price: Optional[str]
 
 

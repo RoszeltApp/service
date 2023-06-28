@@ -7,4 +7,4 @@ class Classificator:
         self.classify = strategy
 
     def classify(self, **kwargs) -> int:
-        return 0
+        return self.classify(**kwargs)

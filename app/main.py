@@ -14,8 +14,13 @@ origins = [
     'http://localhost',
     'http://172.17.0.1',
     'http://localhost:5173',
-    'http://127.0.0.1:5173/'
-
+    'http://127.0.0.1:5173/',
+    'http://127.0.0.1:80/',
+    'http://front-vkr:80/'
+    'http://front-vkr:5173/',
+    'http://front:80/'
+    'http://front:5173/',
+    'http://172.25.0.1',
 ]
 
 app.add_middleware(

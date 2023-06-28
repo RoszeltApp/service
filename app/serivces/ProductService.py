@@ -42,20 +42,23 @@ class ProductService:
 
                 if mapping_product is None:
                     class_params = self.productRepository.get_classificator_params()['res']
+                    print(class_params)
                     prod_params = []
                     for i in product.props:
                         prod_params.append(i.name)
                     prod.class_id = self.classificator.classify(prod_params, class_params)
-
-                    if product.class_id:
-                        prod.class_id = product.class_id
+                    print(prod.class_id, 'sdsadds')
+                    # if product.class_id:
+                    #     prod.class_id = product.class_id
 
                     stock = CommercialCharacteristics(**fields_stock)
+
                     id_mapping = self.productRepository.add_product(prod, stock, supplier_id)
+
                     self.productRepository.add_props(id_mapping, product.props)
 
                     success += 1
-                    print(prod.id)
+
                     success_products.append({'article': prod.article, 'id': prod.id})
                 else:
                     print('test')
@@ -147,4 +150,7 @@ class ProductService:
             content_type=file.content_type
         )
         self.productRepository.update_mapping(mapping)
+
+    def classes(self):
+        return self.productRepository.get_classes()
 

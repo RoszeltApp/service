@@ -12,25 +12,31 @@ from app.schemas.Product import ProductFilter, Props
 class ProductRepository(BaseRepository):
 
     def get_catalog(self, _filter: ProductFilter):
-        query = self.db.query(Product) \
+        query = self.db.query(Product).join(Product.class_product) \
             .join(Product.mapping) \
             .join(UserProductMapping.stock) \
             .options(contains_eager(Product.mapping).options(contains_eager(UserProductMapping.stock),
                                                              joinedload(UserProductMapping.user)
-                                                             .options(load_only(User.name))))
+                                                             .options(load_only(User.name))), contains_eager(Product.class_product))
 
         if _filter.query_string is not None:
             search = f"%{_filter.query_string}%"
             query = query.where(Product.name.like(search))
 
-        if _filter.category is not None:
-            query = query.where(Product.class_id == _filter.category)
 
         if _filter.price_min is not None:
             query = query.where(_filter.price_min <= CommercialCharacteristics.price)
 
         if _filter.price_max is not None:
             query = query.filter(CommercialCharacteristics.price <= _filter.price_max)
+
+        if _filter.suppliers is not None:
+            print(_filter.suppliers.split(','))
+            query = query.filter(UserProductMapping.user_id.in_(_filter.suppliers.split(',')))
+
+        if _filter.category is not None:
+            # print(_filter.category.split(','))
+            query = query.where(Product.class_id.in_(_filter.category.split(',')))
 
         count = query.group_by(Product.id).count()
 
@@ -79,12 +85,14 @@ class ProductRepository(BaseRepository):
 
     def add_product(self, product: Product, stock: CommercialCharacteristics, supplier_id: int):
         usr = self.db.query(User).where(User.id == supplier_id).first()
+        print(usr.name)
         usr.products.append(product)
         self.db.add(usr)
         self.db.commit()
-
+        print('sasv23')
         mapping = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id,
                                                           UserProductMapping.product_id == int(product.id)).first()
+        print(mapping.id)
         stock.id = mapping.id
         self.db.add(stock)
         self.db.commit()
@@ -123,8 +131,9 @@ class ProductRepository(BaseRepository):
         #     .limit(limit).offset(offset).all()
 
         mappings = self.db.query(UserProductMapping).where(UserProductMapping.user_id == supplier_id). \
-            join(UserProductMapping.stock).join(UserProductMapping.product). \
-            options(contains_eager(UserProductMapping.stock)).options(contains_eager(UserProductMapping.product))
+            join(UserProductMapping.stock).join(UserProductMapping.product).join(Product.class_product). \
+            options(contains_eager(UserProductMapping.stock)).options(contains_eager(UserProductMapping.product)
+                                                                      .options(contains_eager(Product.class_product)))
 
         if query_string is not None:
             query_string = f"%{query_string}%"
@@ -219,3 +228,6 @@ class ProductRepository(BaseRepository):
                 'params': i[2][:5000]
             }
             for i in result]}
+
+    def get_classes(self):
+        return self.db.query(Class).all()

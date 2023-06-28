@@ -81,3 +81,8 @@ def upload_main_image(product_id: int, upload_file: UploadFile = File(...), auth
 @product_router.get('/test', summary='test')
 def test(product_service: ProductService = Depends()):
     return product_service.productRepository.get_classificator_params()
+
+
+@product_router.get('/classes', summary='Классы')
+def classes(product_service: ProductService = Depends()):
+    return product_service.classes()
